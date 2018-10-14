@@ -1,3 +1,11 @@
+//
+// Created by root on 10/14/18.
+//
+
+#ifndef OPENCVTEST_MAIN_H
+#define OPENCVTEST_MAIN_H
+
+#endif //OPENCVTEST_MAIN_H
 #pragma once
 #include <iostream>
 #include <cmath>

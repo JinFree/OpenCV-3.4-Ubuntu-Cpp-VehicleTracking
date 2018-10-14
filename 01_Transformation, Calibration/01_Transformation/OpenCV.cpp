@@ -2,73 +2,74 @@
 
 using namespace std;
 using namespace cv;
-Mat videoProcessing(Mat Input) {
-    Mat output = Input.clone();
-    Mat HSV = convertColor(output, CV_BGR2HSV);
-    vector<Mat> HSV_HSV, HSV_Equalized;
-    HSV_HSV = splitChannel(HSV);
-    HSV_Equalized = splitChannel(HSV);
-    HSV_Equalized[1] = histogramEqualize(HSV_Equalized[1]);
-    HSV_Equalized[2] = histogramEqualize(HSV_Equalized[2]);
-    Mat S_E_T_white = thresholdByCV(HSV_Equalized[1], 50, 255, THRESH_TOZERO_INV);
-    Mat HSV_S_E_T_W = mergeChannel(HSV_HSV[0], S_E_T_white, HSV_Equalized[2]);
-    Mat RGB_HSV_W = convertColor(HSV_S_E_T_W, CV_HSV2BGR);
-    Mat W_gray = convertColor(RGB_HSV_W, CV_BGR2GRAY);
-    Mat gray_th = thresholdByCV(W_gray, 240, 255, THRESH_BINARY);
-    Mat roadROI2 = trapezoidalROI(gray_th, 0.35, 0.6, -0.1, 0.95);
-    Mat roadCanny = cannyEdge(roadROI2, 50, 100);
-    Mat roadROI = trapezoidalROI(roadCanny, 0.4, 0.65, 0.0, 0.9);
-    vector<Vec4i> lines = HoughLinesP(roadROI, 1.0, CV_PI/60.0, 20, 10, 50);
-    Mat roadLines = drawLanes(roadROI, lines);
-    output = weightedSum(roadLines, output);
-    return output;
-}
 int main(void) {
-    string roadImagePath = "../../Data/Lane_Detection_Images"/;
-    string file1 = "solidWhiteCurve.jpg";
-    string file2 = "solidWhiteRight.jpg";
-    string file3 = "solidYellowCurve.jpg";
-    string file4 = "solidYellowCurve2.jpg";
-    string file5 = "solidYellowLeft.jpg";
-    string file6 = "whiteCarLaneSwitch.jpg";
+    Mat roadBGR = imageRead(path + roadImage, IMREAD_COLOR);
+    imageShow("roadBGR", roadBGR);
 
-    Mat roadBGR1 = imageRead(roadImagePath + file1, IMREAD_COLOR);
-    imageShow("roadBGR1", roadBGR1);
+    Mat translateRoad_50_110 = translateImage(roadBGR, 50, 110);
+    imageShow("translateRoad_50_110", translateRoad_50_110);
 
-    Mat roadBGR2 = imageRead(roadImagePath + file2, IMREAD_COLOR);
-    imageShow("roadBGR2", roadBGR2);
+    Mat translateRoad_m50_m110 = translateImage(roadBGR, -50, -110);
+    imageShow("translateRoad_m50_m110", translateRoad_m50_m110);
 
-    Mat roadBGR3 = imageRead(roadImagePath + file3, IMREAD_COLOR);
-    imageShow("roadBGR3", roadBGR3);
+    Mat rotateRoad30 = rotateImage(roadBGR, 30, 0);
+    imageShow("rotateRoad30", rotateRoad30);
 
-    Mat roadBGR4 = imageRead(roadImagePath + file4, IMREAD_COLOR);
-    imageShow("roadBGR4", roadBGR4);
+    Mat rotateRoad45 = rotateImage(roadBGR, 45, 0);
+    imageShow("rotateRoad45", rotateRoad45);
 
-    Mat roadBGR5 = imageRead(roadImagePath + file5, IMREAD_COLOR);
-    imageShow("roadBGR5", roadBGR5);
+    Mat rotateRoad60 = rotateImage(roadBGR, 60, 1);
+    imageShow("rotateRoad60", rotateRoad60);
 
-    Mat roadBGR6 = imageRead(roadImagePath + file6, IMREAD_COLOR);
-    imageShow("roadBGR6", roadBGR6);
+    Mat rotateRoad90 = rotateImage(roadBGR, 90, 1);
+    imageShow("rotateRoad90", rotateRoad90);
 
-    Mat Output1 =  videoProcessing(roadBGR1);
-    imageShow("Output1", Output1);
+    Mat resize_test1 = resizeImage(roadBGR, Size(), 1.0, 2.0, INTER_LINEAR);
+    imageShow("resize_test1", resize_test1);
 
-    Mat Output2 =  videoProcessing(roadBGR2);
-    imageShow("Output2", Output2);
+    Mat resize_test1_2 = resizeImage(roadBGR, Size(roadBGR.cols, roadBGR.rows*2.0), 0.0, 0.0, INTER_LINEAR);
+    imageShow("resize_test1_2", resize_test1_2);
 
-    Mat Output3 =  videoProcessing(roadBGR3);
-    imageShow("Output3", Output3);
+    Mat resize_test2 = resizeImage(roadBGR, Size(), 2.0, 1.0, INTER_LINEAR);
+    imageShow("resize_test2", resize_test2);
 
-    Mat Output4 =  videoProcessing(roadBGR4);
-    imageShow("Output4", Output4);
+    Mat resize_test2_2 = resizeImage(roadBGR, Size(roadBGR.cols*2.0, roadBGR.rows), 0.0, 0.0, INTER_LINEAR);
+    imageShow("resize_test2_2", resize_test2_2);
 
-    Mat Output5 =  videoProcessing(roadBGR5);
-    imageShow("Output5", Output5);
+    Point2f srcTri[3];
+    Point2f dstTri[3];
+    srcTri[0] = Point2f( 0,0 );
+    srcTri[1] = Point2f( roadBGR.cols - 1, 0 );
+    srcTri[2] = Point2f( 0, roadBGR.rows - 1 );
 
-    Mat Output6 =  videoProcessing(roadBGR6);
-    imageShow("Output6", Output6);
+    dstTri[0] = Point2f( roadBGR.cols*0.0, roadBGR.rows*0.33 );
+    dstTri[1] = Point2f( roadBGR.cols*0.85, roadBGR.rows*0.25 );
+    dstTri[2] = Point2f( roadBGR.cols*0.15, roadBGR.rows*0.7 );
+    Mat transform3p = transformImage(roadBGR, srcTri, dstTri);
+    imageShow("transform3p", transform3p);
 
+
+    Point2f srcQuad[4];
+    int w = roadBGR.cols;
+    int h = roadBGR.rows;
+    float ratio_x1, ratio_y1, ratio_x2, ratio_y2;
+    ratio_x1 = 0.4;
+    ratio_y1 = 0.65;
+    ratio_x2 = 0.0;
+    ratio_y2 = 0.9;
+    srcQuad[0] = Point2f(w * ratio_x1 , h * ratio_y1);
+    srcQuad[1] = Point2f(w * (1.0 - ratio_x1) , h * ratio_y1);
+    srcQuad[2] = Point2f(w * (1.0 - ratio_x2), h * ratio_y2);
+    srcQuad[3] = Point2f(w * ratio_x2, h * ratio_y2);
+    Point2f dstQuad[4];
+    dstQuad[0] = Point2f(0.0 , 0.0);
+    dstQuad[1] = Point2f(w , 0.0);
+    dstQuad[2] = Point2f(w, h);
+    dstQuad[3] = Point2f(0, h);
+
+    Mat transform4p = perspectiveTransformImage(roadBGR, srcQuad, dstQuad);
+    imageShow("transform4p", transform4p);
     destroyAllWindows();
 
-	return 0;
+    return 0;
 }
