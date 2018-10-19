@@ -3,15 +3,11 @@
 
 using namespace std;
 using namespace cv;
-Mat videoProcessing(Mat Input) {
-    Mat output = Input.clone();
-    output = resizeImage(output, Size(960, 640));
-    output = undistortImage(output);
-    return output;
-}
+
 Mat videoProcessor::videoProcess(Mat Input) {
     Mat output = Input.clone(); 
-    output = videoProcessing(output);
+    output = resizeImage(output, Size(960, 640));
+    output = undistortImage(output);
     return output;
 }
 int main(void) {

@@ -14,6 +14,7 @@ string path = "../../Data/";
 string lennaImage = "Lenna_Images/Lenna.png";
 string roadImage = "Lane_Detection_Images/solidYellowCurve.jpg";
 
+void getRandomColors(vector<Scalar>& colors, int numColors);
 Mat undistortImage(Mat image);
 Mat perspectiveTransformImage(Mat image, Point2f srcpoints[4], Point2f dstpoints[4]);
 Mat transformImage(Mat image, Point2f srcpoints[3], Point2f dstpoints[3]);
@@ -52,6 +53,11 @@ Mat thresholdByData(Mat image, uchar thresh = 128);
 Mat imageRead(string openPath, int flag = IMREAD_UNCHANGED);
 void imageShow(string imageName, Mat image, int flag = CV_WINDOW_NORMAL);
 
+void getRandomColors(vector<Scalar>& colors, int numColors) {
+    RNG rng(0);
+    for(int i=0; i < numColors; i++)
+        colors.push_back(Scalar(rng.uniform(0,255), rng.uniform(0, 255), rng.uniform(0, 255)));
+}
 Mat undistortImage(Mat image) {
     Mat result, map1, map2;
 

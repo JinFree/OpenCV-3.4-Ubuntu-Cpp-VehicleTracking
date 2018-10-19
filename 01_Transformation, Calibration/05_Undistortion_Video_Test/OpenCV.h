@@ -1,11 +1,3 @@
-//
-// Created by root on 10/14/18.
-//
-
-#ifndef OPENCVTEST_MAIN_H
-#define OPENCVTEST_MAIN_H
-
-#endif //OPENCVTEST_MAIN_H
 #pragma once
 #include <iostream>
 #include <cmath>
@@ -21,22 +13,8 @@ using namespace cv;
 string path = "../../Data/";
 string lennaImage = "Lenna_Images/Lenna.png";
 string roadImage = "Lane_Detection_Images/solidYellowCurve.jpg";
-Mat undistortImage(Mat image) {
-    Mat result, map1, map2;
 
-    Mat cameraMatrix = Mat::eye(3,3,CV_64FC1);
-    Mat distCoeffs = Mat::zeros(1, 5, CV_64FC1);
-    cameraMatrix = (Mat1d(3, 3) << 8.6885271072224168e+02, 0., 480., 0., 8.6885271072224168e+02, 270., 0., 0., 1. );
-    distCoeffs=(Mat1d(1, 5) << -2.4600638987410905e-01, -1.6405763498334058e-02, 0., 0., -5.9989978048106393e-02 );
-
-    Size imageSize = image.size();
-    initUndistortRectifyMap(cameraMatrix, distCoeffs, Mat(),
-                            getOptimalNewCameraMatrix(cameraMatrix, distCoeffs, imageSize, 1, imageSize, 0), imageSize,
-                            CV_16SC2, map1, map2);
-
-    remap(image, result, map1, map2, INTER_LINEAR);
-    return result;
-}
+Mat undistortImage(Mat image);
 Mat perspectiveTransformImage(Mat image, Point2f srcpoints[4], Point2f dstpoints[4]);
 Mat transformImage(Mat image, Point2f srcpoints[3], Point2f dstpoints[3]);
 Mat resizeImage(Mat image, Size size = Size(), double cx = 1.0, double cy = 1.0, int interpolation = INTER_LINEAR);
@@ -74,6 +52,22 @@ Mat thresholdByData(Mat image, uchar thresh = 128);
 Mat imageRead(string openPath, int flag = IMREAD_UNCHANGED);
 void imageShow(string imageName, Mat image, int flag = CV_WINDOW_NORMAL);
 
+Mat undistortImage(Mat image) {
+    Mat result, map1, map2;
+
+    Mat cameraMatrix = Mat::eye(3,3,CV_64FC1);
+    Mat distCoeffs = Mat::zeros(1, 5, CV_64FC1);
+    cameraMatrix = (Mat1d(3, 3) << 8.6885271072224168e+02, 0., 480., 0., 8.6885271072224168e+02, 270., 0., 0., 1. );
+    distCoeffs=(Mat1d(1, 5) << -2.4600638987410905e-01, -1.6405763498334058e-02, 0., 0., -5.9989978048106393e-02 );
+
+    Size imageSize = image.size();
+    initUndistortRectifyMap(cameraMatrix, distCoeffs, Mat(),
+                            getOptimalNewCameraMatrix(cameraMatrix, distCoeffs, imageSize, 1, imageSize, 0), imageSize,
+                            CV_16SC2, map1, map2);
+
+    remap(image, result, map1, map2, INTER_LINEAR);
+    return result;
+}
 Mat perspectiveTransformImage(Mat image, Point2f srcpoints[4], Point2f dstpoints[4]) {
     Mat M = getPerspectiveTransform(srcpoints, dstpoints);
     Mat result;
